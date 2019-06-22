@@ -35,35 +35,50 @@ ok !defined $el, 'No data -> undefined node';
 
 # === Test warnings for `undef` values =====================================
 
+#my $saved_warning_bits = ${^WARNING_BITS};
+
 warning_like { xml_from_perl undef } qr/document.*undefined/,
     'xml_from_perl(undef) warns by default when warnings are enabled';
 
 eval {
     no warnings 'XML::FromPerl::undefined';
+    #isnt ${^WARNING_BITS}, $saved_warning_bits, 'different warning bits at ' . __LINE__;
     warning_is { xml_from_perl undef } undef,
-        'XML::FromPerl::undefined warning category works';
+        'xml_from_perl respects XML::FromPerl::undefined warning category';
 } if $] ge '5.014';
+
+#is ${^WARNING_BITS}, $saved_warning_bits, 'same warning bits at ' . __LINE__;
 
 eval {
     no warnings 'XML::FromPerl';
+    #isnt ${^WARNING_BITS}, $saved_warning_bits, 'different warning bits at ' . __LINE__;
     warning_is { xml_from_perl undef } undef,
-        'XML::FromPerl warning category works';
+        'xml_from_perl respects XML::FromPerl warning category';
 };
+
+#is ${^WARNING_BITS}, $saved_warning_bits, 'same warning bits at ' . __LINE__;
 
 $doc = XML::LibXML::Document->new;
 warning_like { xml_node_from_perl $doc, undef } qr/node.*undefined/,
     'xml_node_from_perl(undef) warns by default when warnings are enabled';
 
+#diag $saved_warning_bits;
 eval {
     no warnings 'XML::FromPerl::undefined';
+    #isnt ${^WARNING_BITS}, $saved_warning_bits, 'different warning bits at ' . __LINE__;
     warning_is { xml_node_from_perl $doc, undef } undef,
-        'XML::FromPerl::undefined warning category works in xml_node_from_perl';
+        'xml_node_from_perl respects XML::FromPerl::undefined warning category';
 } if $] ge '5.014';
+
+#is ${^WARNING_BITS}, $saved_warning_bits, 'same warning bits at ' . __LINE__;
 
 eval {
     no warnings 'XML::FromPerl';
+    #isnt ${^WARNING_BITS}, $saved_warning_bits, 'different warning bits at ' . __LINE__;
     warning_is { xml_node_from_perl $doc, undef } undef,
-        'XML::FromPerl warning category works in xml_node_from_perl';
+        'xml_node_from_perl respects XML::FromPerl warning category';
 };
+
+#is ${^WARNING_BITS}, $saved_warning_bits, 'same warning bits at ' . __LINE__;
 
 done_testing;

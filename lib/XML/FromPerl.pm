@@ -4,50 +4,7 @@ our $VERSION = '0.02';
 
 use strict;
 use warnings;
-
-# === Warnings ==============================================================
-
-# Set up for warnings.  We can't do this in a separate package because
-# warnings::enabled() and related rely on caller being the package that
-# invoked this one, not this package itself.
-use if $] ge '5.014', qw(warnings::register undefined);
-use if $] lt '5.014', qw(warnings::register);
-
-# @_warning_category is the category in which we will warn, or an empty list.
-# @_warning_categories is the list of categories we need to check to see
-#   if we should warn.
-use vars qw(@_warning_category @_warning_categories);
-
-if($] ge '5.014') {
-   @_warning_category = (__PACKAGE__ . '::undefined');
-   @_warning_categories = (__PACKAGE__, @_warning_category);
-} else {
-    @_warning_category = ();
-    @_warning_categories = __PACKAGE__;
-}
-
-# Emit a warning and return a value.  Call via goto.  Usage:
-#   @_ = ("warning message", $return_value[,...])
-#   goto &_emit_warning;
-
-sub _emit_warning {
-    my ($message, @retval) = @_;
-
-    # Are all the categories of interest enabled?
-    my $should_emit = 1;
-    foreach(@_warning_categories) {
-        if(!warnings::enabled($_)) {
-            $should_emit = 0;
-            last;
-        }
-    }
-
-    warnings::warn(@_warning_category, $message) if $should_emit;
-
-    return wantarray ? @retval : $retval[0];
-} #_emit_warning
-
-# === Code ==================================================================
+use XML::FromPerl::Warnings;    # Set up our custom warnings
 
 use XML::LibXML;
 
@@ -59,6 +16,8 @@ our @EXPORT_OK = qw(xml_from_perl xml_node_from_perl);
 sub _fill_node_children {
     my ($doc, $parent, $data) = @_;
     unless(defined $data) {
+        use Carp qw(carp);
+        carp "oops";
         @_ = ("I can't create an XML node from undefined data", undef);
         goto &_emit_warning;
     }
